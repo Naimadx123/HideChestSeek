@@ -1,7 +1,6 @@
 package zone.vao.hideChestSeek;
 
 import lombok.Getter;
-import org.bukkit.Location;
 import org.bukkit.plugin.java.JavaPlugin;
 import zone.vao.hideChestSeek.classes.Region;
 import zone.vao.hideChestSeek.listeners.PlayerInteractListener;
