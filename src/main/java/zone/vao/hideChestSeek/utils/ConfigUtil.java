@@ -1,10 +1,12 @@
 package zone.vao.hideChestSeek.utils;
 
+import com.udojava.evalex.Expression;
 import lombok.Getter;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 public class ConfigUtil {
@@ -95,14 +97,46 @@ public class ConfigUtil {
   private String processFunction(String functionName, Object args) {
     return switch (functionName.toLowerCase()) {
       case "random_number" -> processRandomNumberFunction(args);
-
       case "random_item" -> processRandomItemFunction(args);
+      case "expression" -> processExpressionFunction(args);
 
       default -> {
         Bukkit.getLogger().warning("Unknown function '" + functionName + "' in variable processing.");
         yield "";
       }
     };
+  }
+
+  private String processExpressionFunction(Object args) {
+    if (args instanceof String) {
+      String exprStr = (String) args;
+      try {
+        Expression expression = new Expression(exprStr);
+
+        // Custom functions here
+        expression.addFunction(expression.new Function("random", 0) {
+          @Override
+          public BigDecimal eval(List<BigDecimal> parameters) {
+            return new BigDecimal(new Random().nextInt());
+          }
+        });
+
+        expression.addFunction(expression.new Function("toHex", 1) {
+          @Override
+          public BigDecimal eval(List<BigDecimal> parameters) {
+            return new BigDecimal(Integer.toHexString(parameters.get(0).intValue()));
+          }
+        });
+
+        return expression.eval().toString();
+      } catch (Exception e) {
+        Bukkit.getLogger().warning("Error evaluating expression: " + exprStr);
+        return "";
+      }
+    } else {
+      Bukkit.getLogger().warning("Arguments for 'expression' function must be a string.");
+    }
+    return "";
   }
 
   private String processRandomItemFunction(Object args) {
@@ -181,7 +215,6 @@ public class ConfigUtil {
     ConfigurationSection cluesSection = config.getConfigurationSection("messages.clues");
     if (cluesSection != null) {
       for (String key : cluesSection.getKeys(false)) {
-        // Expecting keys in the format 'near_MATERIAL'
         if (key.startsWith("near_")) {
           String materialName = key.substring("near_".length()).toUpperCase();
           Material material = Material.getMaterial(materialName);
@@ -199,9 +232,8 @@ public class ConfigUtil {
     return clues;
   }
 
-  // Example method to retrieve the clue search radius from the config
   public int getClueSearchRadius() {
-    return config.getInt("clue_search_radius", 5); // Default radius of 5
+    return config.getInt("clue_search_radius", 5);
   }
 
   public String parsePlaceholders(String input, Map<String, String> placeholders) {
