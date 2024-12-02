@@ -1,70 +1,160 @@
 package zone.vao.hideChestSeek.utils;
 
+import lombok.Getter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.World;
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class ConfigUtil {
   private final FileConfiguration config;
+  @Getter
+  private Map<String, Object> variables;
 
   public ConfigUtil(FileConfiguration config) {
     this.config = config;
+    loadVariables();
   }
 
-  // General settings
   public int getSpawnIntervalTicks() {
-    return config.getInt("spawn.interval_ticks", 72000); // Default to 72000 if not set
+    return config.getInt("spawn.interval_ticks", 72000);
   }
 
-  // Spawn location settings
   public Location getMinLocation() {
-    String worldName = config.getString("location.world", "world");
-    World world = Bukkit.getWorld(worldName);
-    if (world == null) {
-      throw new IllegalArgumentException("World '" + worldName + "' not found!");
-    }
-
-    double x = config.getDouble("location.minx", 0);
-    double y = config.getDouble("location.miny", 64);
-    double z = config.getDouble("location.minz", 0);
-
-    return new Location(world, x, y, z);
+    return getLocation("location.minx", "location.miny", "location.minz");
   }
 
   public Location getMaxLocation() {
+    return getLocation("location.maxx", "location.maxy", "location.maxz");
+  }
+
+  private Location getLocation(String xPath, String yPath, String zPath) {
     String worldName = config.getString("location.world", "world");
     World world = Bukkit.getWorld(worldName);
     if (world == null) {
       throw new IllegalArgumentException("World '" + worldName + "' not found!");
     }
 
-    double x = config.getDouble("location.maxx", 50);
-    double y = config.getDouble("location.maxy", 80);
-    double z = config.getDouble("location.maxz", 50);
+    double x = config.getDouble(xPath, 0);
+    double y = config.getDouble(yPath, 64);
+    double z = config.getDouble(zPath, 0);
 
     return new Location(world, x, y, z);
   }
 
-  // Chest configuration
-  public List<Integer> getRandomNumberRange() {
-    return config.getIntegerList("chest.variables.rand.random_number");
+  private void loadVariables() {
+    variables = new HashMap<>();
+    ConfigurationSection variablesSection = config.getConfigurationSection("variables");
+    if (variablesSection != null) {
+      for (String variableName : variablesSection.getKeys(false)) {
+        ConfigurationSection variableSection = variablesSection.getConfigurationSection(variableName);
+        if (variableSection != null) {
+          Map<String, Object> functionMap = variableSection.getValues(false);
+          variables.put(variableName, functionMap);
+        } else {
+          Object value = variablesSection.get(variableName);
+          variables.put(variableName, value);
+        }
+      }
+    }
+  }
+
+  public Object getVariable(String variableName) {
+    return variables.get(variableName);
+  }
+
+  public String processVariable(String variableName) {
+    Object variable = getVariable(variableName);
+    if (variable == null) {
+      Bukkit.getLogger().warning("Variable '" + variableName + "' not found.");
+      return "";
+    }
+
+    if (variable instanceof Map) {
+      @SuppressWarnings("unchecked")
+      Map<String, Object> functionMap = (Map<String, Object>) variable;
+
+      if (functionMap.size() == 1) {
+        Map.Entry<String, Object> entry = functionMap.entrySet().iterator().next();
+        String functionName = entry.getKey();
+        Object args = entry.getValue();
+
+        return processFunction(functionName, args);
+      } else {
+        Bukkit.getLogger().warning("Multiple functions defined for variable '" + variableName + "'.");
+        return "";
+      }
+    } else if (variable instanceof String || variable instanceof Number) {
+      return variable.toString();
+    }
+
+    return variable.toString();
+  }
+
+  private String processFunction(String functionName, Object args) {
+    return switch (functionName.toLowerCase()) {
+      case "random_number" -> processRandomNumberFunction(args);
+
+      case "random_item" -> processRandomItemFunction(args);
+
+      default -> {
+        Bukkit.getLogger().warning("Unknown function '" + functionName + "' in variable processing.");
+        yield "";
+      }
+    };
+  }
+
+  private String processRandomItemFunction(Object args) {
+    if (args instanceof List) {
+      List<?> itemList = (List<?>) args;
+      if (!itemList.isEmpty()) {
+        int index = new Random().nextInt(itemList.size());
+        return itemList.get(index).toString();
+      } else {
+        Bukkit.getLogger().warning("Item list for 'random_item' function is empty.");
+      }
+    } else {
+      Bukkit.getLogger().warning("Arguments for 'random_item' function must be a list.");
+    }
+    return "";
+  }
+
+  private String processRandomNumberFunction(Object args) {
+    if (args instanceof List) {
+      List<?> argList = (List<?>) args;
+      if (argList.size() == 2 && argList.get(0) instanceof Number && argList.get(1) instanceof Number) {
+        int min = ((Number) argList.get(0)).intValue();
+        int max = ((Number) argList.get(1)).intValue();
+        Random random = new Random();
+        int randomNumber = min + random.nextInt(max - min + 1);
+        return String.valueOf(randomNumber);
+      } else {
+        Bukkit.getLogger().warning("Invalid arguments for 'random_number' function.");
+      }
+    } else {
+      Bukkit.getLogger().warning("Arguments for 'random_number' function must be a list.");
+    }
+    return "";
   }
 
   public List<String> getChestCommands() {
     return config.getStringList("chest.commands");
   }
 
-  // Block restrictions
   public List<String> getBlockedBlocks() {
-    return config.getStringList("blocked-blocks");
+    List<String> blockedBlocksInit = config.getStringList("blocked-blocks");
+
+    List<String> blockedBlocks = new ArrayList<>();
+    for (String s : blockedBlocksInit) {
+      blockedBlocks.add(s.toUpperCase());
+    }
+    return blockedBlocks;
   }
 
-  // Fireworks settings
   public boolean areFireworksEnabled() {
     return config.getBoolean("fireworks.enabled", true);
   }
@@ -81,7 +171,6 @@ public class ConfigUtil {
     return config.getInt("fireworks.power", 1);
   }
 
-  // Messages and broadcasts
   public String getFoundMessage() {
     return ChatColor.translateAlternateColorCodes('&', config.getString("messages.found_message", "Congratulations {player}, you found the treasure!"));
   }
@@ -90,11 +179,19 @@ public class ConfigUtil {
     return config.getBoolean("messages.broadcast_message", true);
   }
 
+  @SuppressWarnings("unchecked")
   public Map<String, List<String>> getClues() {
-    return (Map<String, List<String>>) config.getMapList("messages.clues");
+    Map<String, List<String>> clues = new HashMap<>();
+    ConfigurationSection cluesSection = config.getConfigurationSection("messages.clues");
+    if (cluesSection != null) {
+      for (String key : cluesSection.getKeys(false)) {
+        List<String> messages = cluesSection.getStringList(key);
+        clues.put(key, messages);
+      }
+    }
+    return clues;
   }
 
-  // Helper method to handle placeholders in commands or messages
   public String parsePlaceholders(String input, Map<String, String> placeholders) {
     String result = input;
     for (Map.Entry<String, String> placeholder : placeholders.entrySet()) {

@@ -1,6 +1,7 @@
 package zone.vao.hideChestSeek.classes;
 
 import lombok.Setter;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.block.Chest;
 import org.bukkit.inventory.ItemStack;

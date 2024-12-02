@@ -12,14 +12,19 @@ location:
   maxy: 80                     # Y range for random spawn location within the area.
   maxz: 50                     # Z radius for random spawn location within the area.
 
+variables:
+  rand:                        # Variable name
+    random_number: [1, 20]     # Define a random range for commands or other logic.
+  prize:                       # Variable name
+    random_item:               # Define a random item from list for commands or other logic.
+      - "diamond"
+      - "emerald"
+      - "gold_ingot"
+
 # Chest configuration
 chest:
-  variables:                   # Variables for randomization.
-    rand:
-      random_number: [1, 20]   # Define a random range for commands or other logic.
-
   commands:                    # Commands to execute when the chest is opened.
-    - "give {player} diamond {rand}"  # Give a random number of diamonds (between 1 and 20) to the player.
+    - "give {player} {prize} {rand}"  # Give a random number of random item to the player.
     - "title {player} title {\"text\":\"Treasure Found!\",\"color\":\"gold\"}"
 
 # Block restrictions
@@ -27,6 +32,8 @@ blocked-blocks:
   - "WATER"                   # Chest cannot spawn on water.
   - "LAVA"                    # Chest cannot spawn on lava.
   - "AIR"                     # Optional: Prevent spawning in midair.
+  - "SHORT_GRASS"             # Optional: Prevent spawning on short grass.
+  - "TALL_GRASS"              # Optional: Prevent spawning on tall grass.
 
 # Firework settings
 fireworks:
