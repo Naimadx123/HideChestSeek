@@ -6,15 +6,16 @@ import zone.vao.hideChestSeek.classes.Region;
 import zone.vao.hideChestSeek.listeners.PlayerInteractListener;
 import zone.vao.hideChestSeek.utils.ConfigUtil;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 @Getter
 public final class HideChestSeek extends JavaPlugin {
 
   public static HideChestSeek instance;
-  public List<Game> games = new ArrayList<Game>();
+  public Map<String, Game> games = new HashMap<>();
   public ConfigUtil configUtil;
+  public GameMonitor gameMonitor;
 
   @Override
   public void onEnable() {
@@ -25,8 +26,7 @@ public final class HideChestSeek extends JavaPlugin {
 
     this.configUtil = new ConfigUtil(this.getConfig());
 
-    Region region = new Region(configUtil.getMinLocation(), configUtil.getMaxLocation());
-    Game game = new Game(region);
+    this.gameMonitor = new GameMonitor();
 
     getServer().getPluginManager()
         .registerEvents(new PlayerInteractListener(), this);
@@ -37,9 +37,10 @@ public final class HideChestSeek extends JavaPlugin {
   @Override
   public void onDisable() {
     // Plugin shutdown logic
+    this.gameMonitor.stopMonitor();
 
     if(!games.isEmpty()) {
-      for (Game game : games) {
+      for (Game game : games.values()) {
         game.destroy();
       }
     }

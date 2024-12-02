@@ -1,10 +1,7 @@
 package zone.vao.hideChestSeek.utils;
 
 import lombok.Getter;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
 
@@ -179,17 +176,32 @@ public class ConfigUtil {
     return config.getBoolean("messages.broadcast_message", true);
   }
 
-  @SuppressWarnings("unchecked")
-  public Map<String, List<String>> getClues() {
-    Map<String, List<String>> clues = new HashMap<>();
+  public Map<Material, List<String>> getClues() {
+    Map<Material, List<String>> clues = new HashMap<>();
     ConfigurationSection cluesSection = config.getConfigurationSection("messages.clues");
     if (cluesSection != null) {
       for (String key : cluesSection.getKeys(false)) {
-        List<String> messages = cluesSection.getStringList(key);
-        clues.put(key, messages);
+        // Expecting keys in the format 'near_MATERIAL'
+        if (key.startsWith("near_")) {
+          String materialName = key.substring("near_".length()).toUpperCase();
+          Material material = Material.getMaterial(materialName);
+          if (material != null) {
+            List<String> messages = cluesSection.getStringList(key);
+            clues.put(material, messages);
+          } else {
+            Bukkit.getLogger().warning("Invalid material '" + materialName + "' in clues configuration.");
+          }
+        } else {
+          Bukkit.getLogger().warning("Invalid clue key format: '" + key + "'. Expected format 'near_MATERIAL'.");
+        }
       }
     }
     return clues;
+  }
+
+  // Example method to retrieve the clue search radius from the config
+  public int getClueSearchRadius() {
+    return config.getInt("clue_search_radius", 5); // Default radius of 5
   }
 
   public String parsePlaceholders(String input, Map<String, String> placeholders) {

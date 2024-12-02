@@ -14,13 +14,18 @@ import zone.vao.hideChestSeek.utils.ConfigUtil;
 
 import java.util.List;
 import java.util.Random;
+import java.util.UUID;
 
-@Getter
+
 public class Game {
-  public Region region;
-  public HiddenChest hiddenChest;
   private final HideChestSeek plugin = HideChestSeek.instance;
   private final ConfigUtil configUtil = plugin.getConfigUtil();
+  @Getter
+  public Region region;
+  @Getter
+  public HiddenChest hiddenChest;
+  @Getter
+  public final String id = UUID.randomUUID().toString();
 
   public Game(Region region) {
 
@@ -33,14 +38,16 @@ public class Game {
     Chest chest = (Chest) block.getState();
     chest.getPersistentDataContainer().set(
         new NamespacedKey(plugin, "chest"),
-        PersistentDataType.BOOLEAN, true
+        PersistentDataType.STRING, this.id
     );
     chest.update();
 
+    this.hiddenChest = new HiddenChest(chest);
   }
 
   public void destroy(){
     hiddenChest.remove();
+    plugin.getGames().remove(id);
   }
 
   private Location getAvailableLocation() {
@@ -78,7 +85,6 @@ public class Game {
         Block blockBelow = location.clone().add(0, -1, 0).getBlock();
         Material blockBelowType = blockBelow.getType();
         if (blockBelowType.isSolid() && !blockedBlocks.contains(blockBelowType.name())) {
-          // Location is acceptable
           return location;
         }
       }

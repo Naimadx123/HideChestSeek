@@ -40,8 +40,8 @@ fireworks:
   enabled: true                # Enable or disable fireworks when the treasure is found.
   type: "BURST"                # Firework effect type (e.g., BURST, STAR, BALL, CREEPER).
   colors:                      # List of colors for the fireworks.
-    - "RED"
-    - "BLUE"
+    - "GOLD"
+    - "WHITE"
     - "GREEN"
   power: 1                     # Power level of the fireworks (1-3).
 
@@ -57,3 +57,5 @@ messages:
       - "Look for lava around."
     near_tall_grass:
       - "It’s not far from a tall grass."
+
+clue_search_radius: 5
