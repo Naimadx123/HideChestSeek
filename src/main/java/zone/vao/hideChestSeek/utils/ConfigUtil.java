@@ -112,23 +112,17 @@ public class ConfigUtil {
       try {
         Bukkit.getLogger().info("Evaluating expression: " + exprStr);
 
-        // Create a map for custom functions
-        Map<String, Object> functionMap = new HashMap<>();
-        functionMap.put(null, new ExpressionFunctions());
+        Map<String, Object> funcs = new HashMap<>();
+        funcs.put(null, Math.class);
+        funcs.put("util", new ExpressionFunctions());
 
-        // Create a JexlEngine with custom namespaces
         JexlEngine jexl = new JexlBuilder()
-            .namespaces(functionMap)
+            .namespaces(funcs)
             .create();
 
-        // Create an expression evaluator
-        JexlExpression expression = jexl.createExpression(exprStr);
-
-        // Create a context (if you need to pass variables)
+        JexlExpression je = jexl.createExpression(exprStr);
         JexlContext context = new MapContext();
-
-        // Evaluate the expression
-        Object result = expression.evaluate(context);
+        Object result = je.evaluate(context);
 
         Bukkit.getLogger().info("Expression result: " + result);
 
@@ -143,7 +137,6 @@ public class ConfigUtil {
     }
     return "";
   }
-
 
 
   private String processRandomItemFunction(Object args) {
