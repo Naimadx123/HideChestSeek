@@ -14,6 +14,9 @@ public class FireworkUtil {
   private final HideChestSeek plugin = HideChestSeek.instance;
   private final ConfigUtil configUtil = plugin.getConfigUtil();
 
+  /**
+  *  @param location Location of block where firework should be spawned
+  */
   public void spawnFirework(Location location) {
     if (!configUtil.areFireworksEnabled()) {
       return;

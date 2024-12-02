@@ -27,6 +27,9 @@ public class Game {
   @Getter
   public final String id = UUID.randomUUID().toString();
 
+  /**
+   * @param region Region of game
+   */
   public Game(Region region) {
 
     this.region = region;
