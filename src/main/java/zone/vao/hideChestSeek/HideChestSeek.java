@@ -1,8 +1,10 @@
 package zone.vao.hideChestSeek;
 
+import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 import zone.vao.hideChestSeek.classes.Region;
+import zone.vao.hideChestSeek.commands.HCSCommand;
 import zone.vao.hideChestSeek.listeners.PlayerInteractListener;
 import zone.vao.hideChestSeek.utils.ConfigUtil;
 
@@ -25,8 +27,11 @@ public final class HideChestSeek extends JavaPlugin {
     saveDefaultConfig();
 
     this.configUtil = new ConfigUtil(this.getConfig());
-
     this.gameMonitor = new GameMonitor();
+
+    // Load command
+    PaperCommandManager commandManager = new PaperCommandManager(this);
+    commandManager.registerCommand(new HCSCommand());
 
     getServer().getPluginManager()
         .registerEvents(new PlayerInteractListener(), this);
@@ -46,5 +51,19 @@ public final class HideChestSeek extends JavaPlugin {
     }
 
     this.getLogger().info("HideChestSeek disabled!");
+  }
+
+  public void reload(){
+    this.gameMonitor.stopMonitor();
+    this.reloadConfig();
+    this.configUtil = new ConfigUtil(this.getConfig());
+
+    if(!games.isEmpty()) {
+      for (Game game : games.values()) {
+        game.destroy();
+      }
+    }
+
+    this.gameMonitor.startMonitor();
   }
 }

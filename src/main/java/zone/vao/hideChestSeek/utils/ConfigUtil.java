@@ -1,12 +1,12 @@
 package zone.vao.hideChestSeek.utils;
 
-import com.udojava.evalex.Expression;
 import lombok.Getter;
+import org.apache.commons.jexl3.*;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
+import zone.vao.hideChestSeek.HideChestSeek;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 public class ConfigUtil {
@@ -108,29 +108,34 @@ public class ConfigUtil {
   }
 
   private String processExpressionFunction(Object args) {
-    if (args instanceof String) {
-      String exprStr = (String) args;
+    if (args instanceof String exprStr) {
       try {
-        Expression expression = new Expression(exprStr);
+        Bukkit.getLogger().info("Evaluating expression: " + exprStr);
 
-        // Custom functions here
-        expression.addFunction(expression.new Function("random", 0) {
-          @Override
-          public BigDecimal eval(List<BigDecimal> parameters) {
-            return new BigDecimal(new Random().nextInt());
-          }
-        });
+        // Create a map for custom functions
+        Map<String, Object> functionMap = new HashMap<>();
+        functionMap.put(null, new ExpressionFunctions());
 
-        expression.addFunction(expression.new Function("toHex", 1) {
-          @Override
-          public BigDecimal eval(List<BigDecimal> parameters) {
-            return new BigDecimal(Integer.toHexString(parameters.get(0).intValue()));
-          }
-        });
+        // Create a JexlEngine with custom namespaces
+        JexlEngine jexl = new JexlBuilder()
+            .namespaces(functionMap)
+            .create();
 
-        return expression.eval().toString();
+        // Create an expression evaluator
+        JexlExpression expression = jexl.createExpression(exprStr);
+
+        // Create a context (if you need to pass variables)
+        JexlContext context = new MapContext();
+
+        // Evaluate the expression
+        Object result = expression.evaluate(context);
+
+        Bukkit.getLogger().info("Expression result: " + result);
+
+        return result != null ? result.toString() : "";
       } catch (Exception e) {
         Bukkit.getLogger().warning("Error evaluating expression: " + exprStr);
+        e.printStackTrace();
         return "";
       }
     } else {
@@ -138,6 +143,8 @@ public class ConfigUtil {
     }
     return "";
   }
+
+
 
   private String processRandomItemFunction(Object args) {
     if (args instanceof List) {

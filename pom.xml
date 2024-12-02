@@ -64,6 +64,10 @@
             <id>jitpack.io</id>
             <url>https://jitpack.io</url>
         </repository>
+        <repository>
+            <id>aikar</id>
+            <url>https://repo.aikar.co/content/groups/aikar/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -92,9 +96,14 @@
             <scope>compile</scope>
         </dependency>
         <dependency>
-            <groupId>com.udojava</groupId>
-            <artifactId>EvalEx</artifactId>
-            <version>2.7</version>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-jexl3</artifactId>
+            <version>3.4.0</version>
+        </dependency>
+        <dependency>
+            <groupId>co.aikar</groupId>
+            <artifactId>acf-paper</artifactId>
+            <version>0.5.1-SNAPSHOT</version>
         </dependency>
     </dependencies>
 </project>

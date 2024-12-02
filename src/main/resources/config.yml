@@ -20,8 +20,6 @@ variables:
       - "diamond"
       - "emerald"
       - "gold_ingot"
-  hex:
-    expression: "toHex(random())"
 
 # Chest configuration
 chest:
