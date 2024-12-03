@@ -5,7 +5,6 @@ import org.apache.commons.jexl3.*;
 import org.bukkit.*;
 import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import zone.vao.hideChestSeek.HideChestSeek;
 
 import java.util.*;
 

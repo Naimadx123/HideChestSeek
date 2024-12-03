@@ -3,8 +3,8 @@ package zone.vao.hideChestSeek;
 import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
-import zone.vao.hideChestSeek.classes.Region;
 import zone.vao.hideChestSeek.commands.HCSCommand;
+import zone.vao.hideChestSeek.events.HiddenChestFoundListener;
 import zone.vao.hideChestSeek.listeners.PlayerInteractListener;
 import zone.vao.hideChestSeek.utils.ConfigUtil;
 
@@ -35,6 +35,8 @@ public final class HideChestSeek extends JavaPlugin {
 
     getServer().getPluginManager()
         .registerEvents(new PlayerInteractListener(), this);
+    getServer().getPluginManager()
+        .registerEvents(new HiddenChestFoundListener(), this);
 
     this.getLogger().info("HideChestSeek enabled!");
   }

@@ -1,9 +1,9 @@
 package zone.vao.hideChestSeek.utils;
 
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Block;
-import org.bukkit.Material;
 import zone.vao.hideChestSeek.HideChestSeek;
 
 import java.util.ArrayList;

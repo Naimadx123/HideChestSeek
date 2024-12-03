@@ -1,5 +1,6 @@
 package zone.vao.hideChestSeek.classes;
 
+import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -14,6 +15,7 @@ import java.util.Random;
 
 public class HiddenChest {
 
+  @Getter
   public final Chest chest;
   @Setter
   public boolean spawned;
