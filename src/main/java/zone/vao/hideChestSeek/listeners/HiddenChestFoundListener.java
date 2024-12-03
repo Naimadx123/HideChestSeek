@@ -1,4 +1,4 @@
-package zone.vao.hideChestSeek.events;
+package zone.vao.hideChestSeek.listeners;
 
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
@@ -6,6 +6,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import zone.vao.hideChestSeek.Game;
 import zone.vao.hideChestSeek.HideChestSeek;
+import zone.vao.hideChestSeek.events.HiddenChestFoundEvent;
 import zone.vao.hideChestSeek.utils.ConfigUtil;
 import zone.vao.hideChestSeek.utils.FireworkUtil;
 

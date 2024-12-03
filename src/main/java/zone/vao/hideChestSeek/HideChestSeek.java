@@ -4,7 +4,7 @@ import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
 import zone.vao.hideChestSeek.commands.HCSCommand;
-import zone.vao.hideChestSeek.events.HiddenChestFoundListener;
+import zone.vao.hideChestSeek.listeners.HiddenChestFoundListener;
 import zone.vao.hideChestSeek.listeners.PlayerInteractListener;
 import zone.vao.hideChestSeek.utils.ConfigUtil;
 
