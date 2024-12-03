@@ -24,7 +24,7 @@ jobs:
           java-version: '21'
 
       - name: Cache Maven repository
-        uses: actions/cache@v4
+        uses: actions/cache@v3
         with:
           path: ~/.m2
           key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
@@ -37,7 +37,7 @@ jobs:
       - name: Upload Build Artifact
         uses: actions/upload-artifact@v3
         with:
-          name: plugin-jar
+          name: HideChestSeek
           path: target/*.jar
 
   release:
