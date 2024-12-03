@@ -50,10 +50,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Download Build Artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: HideChestSeek
+
       - name: Upload Release Artifact
         uses: ncipollo/release-action@v1
         with:
-          artifacts: target/HideChestSeek*.jar
+          artifacts: HideChestSeek*.jar
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
