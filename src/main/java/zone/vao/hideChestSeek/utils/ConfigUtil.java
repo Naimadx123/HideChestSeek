@@ -107,34 +107,44 @@ public class ConfigUtil {
   }
 
   private String processExpressionFunction(Object args) {
-    if (args instanceof String exprStr) {
-      try {
-        Bukkit.getLogger().info("Evaluating expression: " + exprStr);
-
-        Map<String, Object> funcs = new HashMap<>();
-        funcs.put(null, Math.class);
-        funcs.put("util", new ExpressionFunctions());
-
-        JexlEngine jexl = new JexlBuilder()
-            .namespaces(funcs)
-            .create();
-
-        JexlExpression je = jexl.createExpression(exprStr);
-        JexlContext context = new MapContext();
-        Object result = je.evaluate(context);
-
-        Bukkit.getLogger().info("Expression result: " + result);
-
-        return result != null ? result.toString() : "";
-      } catch (Exception e) {
-        Bukkit.getLogger().warning("Error evaluating expression: " + exprStr);
-        e.printStackTrace();
-        return "";
-      }
-    } else {
+    if (!(args instanceof String exprStr)) {
       Bukkit.getLogger().warning("Arguments for 'expression' function must be a string.");
+      return "";
     }
-    return "";
+
+    Bukkit.getLogger().info("Evaluating expression: " + exprStr);
+
+    try {
+      Map<String, Object> functionMap = new HashMap<>();
+      functionMap.put(null, Math.class);
+      functionMap.put("Util", new ExpressionFunctions());
+      functionMap.put("Integer", Integer.class);
+      functionMap.put("String", String.class);
+      functionMap.put("Random", new Random());
+
+      System.out.println(functionMap.toString());
+
+      // Create the JexlEngine with namespaces
+      JexlEngine jexlEngine = new JexlBuilder()
+          .namespaces(functionMap)
+          .silent(false)
+          .strict(true)
+          .create();
+
+      JexlExpression expression = jexlEngine.createExpression(exprStr);
+
+      JexlContext context = new MapContext();
+
+      Object result = expression.evaluate(context);
+
+      Bukkit.getLogger().info("Expression result: " + result);
+      return result != null ? result.toString() : "";
+    } catch (Exception ex) {
+      Bukkit.getLogger().warning("Error evaluating expression: " + exprStr);
+      Bukkit.getLogger().warning("Exception: " + ex.getMessage());
+      ex.printStackTrace();
+      return "";
+    }
   }
 
 

@@ -20,6 +20,8 @@ variables:
       - "diamond"
       - "emerald"
       - "gold_ingot"
+  hex:
+    expression: "Integer:toHexString(Random:nextInt())"  # Expression in Java. There are 4 registered classes: Integer, String, Random and Math (don't provide namespace for Math methods)
 
 # Chest configuration
 chest:
