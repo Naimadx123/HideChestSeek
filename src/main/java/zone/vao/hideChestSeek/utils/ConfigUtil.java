@@ -139,15 +139,13 @@ public class ConfigUtil {
     } catch (Exception ex) {
       Bukkit.getLogger().warning("Error evaluating expression: " + exprStr);
       Bukkit.getLogger().warning("Exception: " + ex.getMessage());
-      ex.printStackTrace();
       return "";
     }
   }
 
 
   private String processRandomItemFunction(Object args) {
-    if (args instanceof List) {
-      List<?> itemList = (List<?>) args;
+    if (args instanceof List<?> itemList) {
       if (!itemList.isEmpty()) {
         int index = new Random().nextInt(itemList.size());
         return itemList.get(index).toString();
@@ -161,8 +159,7 @@ public class ConfigUtil {
   }
 
   private String processRandomNumberFunction(Object args) {
-    if (args instanceof List) {
-      List<?> argList = (List<?>) args;
+    if (args instanceof List<?> argList) {
       if (argList.size() == 2 && argList.get(0) instanceof Number && argList.get(1) instanceof Number) {
         int min = ((Number) argList.get(0)).intValue();
         int max = ((Number) argList.get(1)).intValue();
