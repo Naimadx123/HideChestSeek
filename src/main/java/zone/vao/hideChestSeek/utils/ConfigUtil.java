@@ -122,9 +122,6 @@ public class ConfigUtil {
       functionMap.put("String", String.class);
       functionMap.put("Random", new Random());
 
-      System.out.println(functionMap.toString());
-
-      // Create the JexlEngine with namespaces
       JexlEngine jexlEngine = new JexlBuilder()
           .namespaces(functionMap)
           .silent(false)
