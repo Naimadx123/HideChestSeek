@@ -1,5 +1,6 @@
 package zone.vao.hideChestSeek.listeners;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -37,6 +38,10 @@ public class HiddenChestFoundListener implements Listener {
     this.fireworkUtil.spawnFirework(game.getHiddenChest().getChest().getBlock().getLocation());
 
     game.destroy();
+
+    if(configUtil.isBroadcastMessageEnabled()){
+      Bukkit.getServer().broadcastMessage(parseCommand(configUtil.getFoundMessage(), player, configUtil));
+    }
   }
 
   private String parseCommand(String command, Player player, ConfigUtil configUtil) {
