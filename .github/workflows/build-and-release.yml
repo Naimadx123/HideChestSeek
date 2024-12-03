@@ -53,7 +53,7 @@ jobs:
       - name: Upload Release Artifact
         uses: ncipollo/release-action@v1
         with:
-          artifacts: target/*.jar
+          artifacts: target/HideChestSeek*.jar
           token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref_name }}
           name: Release ${{ github.ref_name }}
