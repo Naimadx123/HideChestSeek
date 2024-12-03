@@ -38,7 +38,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: HideChestSeek
-          path: target/*.jar
+          path: target/HideChestSeek*.jar
 
   release:
     name: Create Release
