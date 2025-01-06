@@ -1,12 +1,16 @@
 package zone.vao.hideChestSeek.classes;
 
 import lombok.Getter;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import zone.vao.hideChestSeek.Game;
+import zone.vao.hideChestSeek.HideChestSeek;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Getter
 public class Region {
@@ -21,12 +25,12 @@ public class Region {
 
   public Region(Location loc1, Location loc2) {
     this.world = loc1.getWorld();
-    this.minx = loc1.getBlockX();
-    this.miny = loc1.getBlockY();
-    this.minz = loc1.getBlockZ();
-    this.maxx = loc2.getBlockX();
-    this.maxy = loc2.getBlockY();
-    this.maxz = loc2.getBlockZ();
+    this.minx = Math.min(loc1.getBlockX(), loc2.getBlockX());
+    this.miny = Math.min(loc1.getBlockY(), loc2.getBlockY());
+    this.minz = Math.min(loc1.getBlockZ(), loc2.getBlockZ());
+    this.maxx = Math.max(loc1.getBlockX(), loc2.getBlockX());
+    this.maxy = Math.max(loc1.getBlockY(), loc2.getBlockY());
+    this.maxz = Math.max(loc1.getBlockZ(), loc2.getBlockZ());
   }
 
   public Location getMaxLocation(){
@@ -36,6 +40,7 @@ public class Region {
   public Location getMinLocation(){
     return new Location(world, minx, miny, minz);
   }
+
 
   public boolean isInside(Location loc) {
     if (loc == null || loc.getWorld() == null) {
@@ -50,9 +55,9 @@ public class Region {
     int y = loc.getBlockY();
     int z = loc.getBlockZ();
 
-    return x >= minx && x <= maxx &&
-        y >= miny && y <= maxy &&
-        z >= minz && z <= maxz;
+    return loc.getBlockX() >= minx && loc.getBlockX() <= maxx &&
+        loc.getBlockY() >= miny && loc.getBlockY() <= maxy &&
+        loc.getBlockZ() >= minz && loc.getBlockZ() <= maxz;
   }
 
   public List<Block> loadBlocks(){
@@ -66,5 +71,21 @@ public class Region {
       }
     }
     return blocks;
+  }
+
+  public static String getGameId(Location loc) {
+
+    String result = null;
+    for (Map.Entry<String, Game> entry : HideChestSeek.getInstance().getGames().entrySet()) {
+      Game game = entry.getValue();
+      String key = entry.getKey();
+
+      if(game.getRegion().isInside(loc)) {
+        result = key;
+      }
+    }
+
+
+    return result;
   }
 }

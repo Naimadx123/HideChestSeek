@@ -8,6 +8,7 @@ import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Chest;
 import org.bukkit.persistence.PersistentDataType;
+import org.bukkit.scheduler.BukkitTask;
 import zone.vao.hideChestSeek.classes.HiddenChest;
 import zone.vao.hideChestSeek.classes.Region;
 import zone.vao.hideChestSeek.utils.ConfigUtil;
@@ -15,11 +16,12 @@ import zone.vao.hideChestSeek.utils.ConfigUtil;
 import java.util.List;
 import java.util.Random;
 import java.util.UUID;
-
+import org.bukkit.scheduler.BukkitRunnable;
 
 public class Game {
   private final HideChestSeek plugin = HideChestSeek.instance;
   private final ConfigUtil configUtil = plugin.getConfigUtil();
+  private BukkitTask task;
   @Getter
   public Region region;
   @Getter
@@ -27,13 +29,22 @@ public class Game {
   @Getter
   public final String id = UUID.randomUUID().toString();
 
+  private static final int TICKS_PER_SECOND = 20;
+  private static final int MILLISECONDS_PER_SECOND = 1000;
+  private final long spawnInterval = (long) (plugin.getConfigUtil().getSpawnIntervalTicks() / TICKS_PER_SECOND) * MILLISECONDS_PER_SECOND;
+
+  private boolean monitoringStarted = false;
+
   /**
    * @param region Region of game
    */
   public Game(Region region) {
-
     this.region = region;
 
+    this.createHiddenChest();
+  }
+
+  public void createHiddenChest(){
     Location loc = this.getAvailableLocation();
     Block block = loc.getBlock();
     block.setType(Material.CHEST);
@@ -48,9 +59,43 @@ public class Game {
     this.hiddenChest = new HiddenChest(chest);
   }
 
-  public void destroy(){
+  public void removeHiddenChest(){
     hiddenChest.remove();
+  }
+
+  public void destroy() {
+    stopMonitor();
+    removeHiddenChest();
     plugin.getGames().remove(id);
+  }
+
+  public void stopMonitor(){
+    if(monitoringStarted){
+      monitoringStarted = false;
+      if(task != null && !task.isCancelled())
+        task.cancel();
+    }
+  }
+
+  public void startMonitor() {
+    if (monitoringStarted || task != null && !task.isCancelled()) return;
+
+    monitoringStarted = true;
+
+    final long lastSpawn = System.currentTimeMillis();
+    this.task = new BukkitRunnable() {
+      @Override
+      public void run() {
+        long nextSpawnTime = lastSpawn + spawnInterval;
+        if (nextSpawnTime > System.currentTimeMillis()) {
+          return;
+        }
+
+        createHiddenChest();
+        monitoringStarted = false;
+        this.cancel();
+      }
+    }.runTaskTimer(plugin, 0L, 1L);
   }
 
   private Location getAvailableLocation() {
@@ -97,6 +142,4 @@ public class Game {
     plugin.getLogger().warning("No suitable location found for the hidden chest after " + maxAttempts + " attempts.");
     return null;
   }
-
-
 }

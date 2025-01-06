@@ -20,12 +20,25 @@ variables:
       - "diamond"
       - "emerald"
       - "gold_ingot"
+  prize_with_chances:               # Variable name
+    item_with_chance:               # Define a random item from list for commands or other logic.
+      - "diamond:10:5"              # item:max_quantity:probability
+      - "emerald:15:10"
+      - "gold_nugget:20:1"
+      - "raw_gold:15:1"
+      - "iron_nugget:25:1"
+      - "raw_iron:20:1"
+      - "raw_copper:30:1"
+      - "netherite_scrap:1:1"
+      - "quartz:5:5"
+      - "coal:35:10"
   hex:
     expression: "Integer:toHexString(Random:nextInt())"  # Expression in Java. There are 4 registered classes: Integer, String, Random and Math (don't provide namespace for Math methods)
 
 # Chest configuration
 chest:
   commands:                    # Commands to execute when the chest is opened.
+    - "give {player} {prize_with_chances.item} {prize_with_chances.quantity}"  # Give a random number of random item to the player (With chance).
     - "give {player} {prize} {rand}"  # Give a random number of random item to the player.
     - "title {player} title {\"text\":\"Treasure Found!\",\"color\":\"gold\"}"
 

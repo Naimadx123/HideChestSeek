@@ -93,10 +93,61 @@ public class ConfigUtil {
     return variable.toString();
   }
 
+  private String processItemWithChanceFunction(Object args) {
+    if (args instanceof List<?> itemList) {
+      if (!itemList.isEmpty()) {
+        List<ItemChance> itemChances = new ArrayList<>();
+        int totalWeight = 0;
+
+        for (Object itemEntry : itemList) {
+          if (itemEntry instanceof String entry) {
+            String[] parts = entry.split(":");
+            if (parts.length == 3) {
+              try {
+                String itemName = parts[0];
+                int maxQuantity = Integer.parseInt(parts[1]);
+                int chance = Integer.parseInt(parts[2]);
+
+                totalWeight += chance;
+                itemChances.add(new ItemChance(itemName, chance, maxQuantity));
+              } catch (NumberFormatException e) {
+                Bukkit.getLogger().warning("Invalid format for item_with_chance entry: " + entry);
+              }
+            } else {
+              Bukkit.getLogger().warning("Invalid format for item_with_chance entry: " + entry);
+            }
+          }
+        }
+
+        if (totalWeight > 0) {
+          int randomValue = new Random().nextInt(totalWeight);
+          int cumulativeWeight = 0;
+
+          for (ItemChance itemChance : itemChances) {
+            cumulativeWeight += itemChance.getChance();
+            if (randomValue < cumulativeWeight) {
+              int quantity = 1 + new Random().nextInt(itemChance.getMaxQuantity());
+              return itemChance.getItemName() + ":" + quantity;
+            }
+          }
+        } else {
+          Bukkit.getLogger().warning("Total weight is zero for item_with_chance entries.");
+        }
+      } else {
+        Bukkit.getLogger().warning("Item list for 'item_with_chance' function is empty.");
+      }
+    } else {
+      Bukkit.getLogger().warning("Arguments for 'item_with_chance' function must be a list.");
+    }
+    return "";
+  }
+
+
   private String processFunction(String functionName, Object args) {
     return switch (functionName.toLowerCase()) {
       case "random_number" -> processRandomNumberFunction(args);
       case "random_item" -> processRandomItemFunction(args);
+      case "item_with_chance" -> processItemWithChanceFunction(args);
       case "expression" -> processExpressionFunction(args);
 
       default -> {
@@ -246,4 +297,19 @@ public class ConfigUtil {
     }
     return result;
   }
+
+  @Getter
+  private static class ItemChance {
+    private final String itemName;
+    private final int chance;
+    private final int maxQuantity;
+
+    public ItemChance(String itemName, int chance, int maxQuantity) {
+      this.itemName = itemName;
+      this.chance = chance;
+      this.maxQuantity = maxQuantity;
+    }
+
+  }
+
 }

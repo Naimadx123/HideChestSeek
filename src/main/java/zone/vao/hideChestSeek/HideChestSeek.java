@@ -3,6 +3,7 @@ package zone.vao.hideChestSeek;
 import co.aikar.commands.PaperCommandManager;
 import lombok.Getter;
 import org.bukkit.plugin.java.JavaPlugin;
+import zone.vao.hideChestSeek.classes.Region;
 import zone.vao.hideChestSeek.commands.HCSCommand;
 import zone.vao.hideChestSeek.listeners.HiddenChestFoundListener;
 import zone.vao.hideChestSeek.listeners.PlayerInteractListener;
@@ -14,10 +15,10 @@ import java.util.Map;
 @Getter
 public final class HideChestSeek extends JavaPlugin {
 
+  @Getter
   public static HideChestSeek instance;
   public Map<String, Game> games = new HashMap<>();
   public ConfigUtil configUtil;
-  public GameMonitor gameMonitor;
 
   @Override
   public void onEnable() {
@@ -27,7 +28,6 @@ public final class HideChestSeek extends JavaPlugin {
     saveDefaultConfig();
 
     this.configUtil = new ConfigUtil(this.getConfig());
-    this.gameMonitor = new GameMonitor();
 
     // Load command
     PaperCommandManager commandManager = new PaperCommandManager(this);
@@ -39,12 +39,14 @@ public final class HideChestSeek extends JavaPlugin {
         .registerEvents(new HiddenChestFoundListener(), this);
 
     this.getLogger().info("HideChestSeek enabled!");
+
+    Game newGame = new Game(new Region(getConfigUtil().getMinLocation(), getConfigUtil().getMaxLocation()));
+    getGames().put(newGame.getId(), newGame);
   }
 
   @Override
   public void onDisable() {
     // Plugin shutdown logic
-    this.gameMonitor.stopMonitor();
 
     if(!games.isEmpty()) {
       for (Game game : games.values()) {
@@ -56,7 +58,6 @@ public final class HideChestSeek extends JavaPlugin {
   }
 
   public void reload(){
-    this.gameMonitor.stopMonitor();
     this.reloadConfig();
     this.configUtil = new ConfigUtil(this.getConfig());
 
@@ -65,7 +66,8 @@ public final class HideChestSeek extends JavaPlugin {
         game.destroy();
       }
     }
-
-    this.gameMonitor.startMonitor();
+    games.clear();
+    Game newGame = new Game(new Region(getConfigUtil().getMinLocation(), getConfigUtil().getMaxLocation()));
+    getGames().put(newGame.getId(), newGame);
   }
 }

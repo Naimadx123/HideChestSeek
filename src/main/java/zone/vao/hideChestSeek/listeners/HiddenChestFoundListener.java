@@ -37,7 +37,7 @@ public class HiddenChestFoundListener implements Listener {
 
     this.fireworkUtil.spawnFirework(game.getHiddenChest().getChest().getBlock().getLocation());
 
-    game.destroy();
+    game.removeHiddenChest();
 
     if(configUtil.isBroadcastMessageEnabled()){
       Bukkit.getServer().broadcastMessage(parseCommand(configUtil.getFoundMessage(), player, configUtil));
@@ -51,9 +51,22 @@ public class HiddenChestFoundListener implements Listener {
 
     for (String variableName : configUtil.getVariables().keySet()) {
       String value = configUtil.processVariable(variableName);
-      placeholders.put(variableName, value);
+
+      if (value.contains(":")) {
+        String[] parts = value.split(":");
+        if (parts.length == 2) {
+          placeholders.put(variableName + ".item", parts[0]);
+          placeholders.put(variableName + ".quantity", parts[1]);
+        } else {
+          placeholders.put(variableName, value);
+        }
+      } else {
+        placeholders.put(variableName, value);
+      }
     }
 
+    // Replace placeholders in the command
     return configUtil.parsePlaceholders(command, placeholders);
   }
+
 }
