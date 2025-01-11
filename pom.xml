@@ -6,7 +6,7 @@
 
     <groupId>zone.vao</groupId>
     <artifactId>HideChestSeek</artifactId>
-    <version>1.1.0</version>
+    <version>1.1.1</version>
     <packaging>jar</packaging>
 
     <name>HideChestSeek</name>
