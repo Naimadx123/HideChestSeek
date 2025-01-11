@@ -46,6 +46,10 @@ public class Game {
 
   public void createHiddenChest(){
     Location loc = this.getAvailableLocation();
+    if(loc == null) {
+      HideChestSeek.getInstance().getLogger().warning("Cannot get available location!");
+      return;
+    }
     Block block = loc.getBlock();
     block.setType(Material.CHEST);
 
